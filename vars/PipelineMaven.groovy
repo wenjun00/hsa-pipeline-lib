@@ -16,7 +16,7 @@ def call(Map userConfig) {
         // mvn命令地址
         "mvn": "/usr/local/maven/bin/mvn",
         // git账号Id
-        "credId": "d6378996-5caa-4fee-828f-7ec2b0593850",
+        "credId": "",
         // 检测应用正常启动的超时时间
         "verifyAppStartupTimeout": 60,
         // 钉钉机器人的token
