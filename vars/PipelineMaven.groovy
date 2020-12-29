@@ -114,6 +114,55 @@ def call(Map userConfig) {
                     }
                 }
             }
+            
+            stage("启动应用") {
+                when {
+                    expression {
+                        return isDeploy || isRestart
+                    }
+                }
+                steps {
+                    script {
+                        echo ">>>>>>>>>>>>>>>>>>>>开始启动应用"
+                        // 端口号+通用jvm参数
+                        def jvmArgs = "-Dserver.port=${selectedServer.port} " + config.commonJvmArgs
+                        // 服务器特有jvm参数
+                        if (selectedServer.jvmArgs) {
+                            jvmArgs += " " + selectedServer.jvmArgs
+                        }
+                        println("jvm参数：${jvmArgs}")
+                        sh "sshpass -p ${selectedServer.passwd} ssh -p ${selectedServer.sshPort} -o StrictHostKeychecking=no ${selectedServer.user}@${selectedServer.ip} ' sh ~/bin/scripts/restartJar.sh \"${jvmArgs}\" '"
+                    }
+
+                    script {
+                        // 休眠20秒，等待应用关闭
+                        sleep 20
+                        try {
+                            timeout(time: config.verifyAppStartupTimeout, unit: 'SECONDS') {
+                                while(true) {
+                                    try {
+                                        // 使用nc命令探测端口是否开启
+                                        sh "nc -z ${selectedServer.ip} ${selectedServer.port}"
+                                        return true
+                                    } catch (exception) {
+                                        // 隔10秒后再次重试
+                                        sleep 10
+                                    }
+                                }
+                            }
+                                           
+                            message = '部署成功'
+                            echo ">>>>>>>>>>>>>>>>>>>>端口检测成功，应用启动完成"
+
+                            println("服务器信息：${selectedServer}")
+                        } catch(exception) {
+                            message = '部署失败'
+
+                            error ">>>>>>>>>>>>>>>>>>>>${selectedServer.ip} ${selectedServer.port} 未监测到应用端口启动，请到如下服务器查看应用log：${selectedServer}"
+                        }
+                    }
+                }
+            }
         }
     }
 }
