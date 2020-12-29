@@ -99,6 +99,20 @@ def call(Map userConfig) {
                     }
                 }
             }
+            stage("拷贝jar/war包") {
+                when {
+                    expression {
+                        return isDeploy
+                    }
+                }
+                steps {
+                    script {
+                        echo ">>>>>>>>>>>>>>>>>>>>开始拷贝jar/war包"
+                        sh "sshpass -p ${selectedServer.passwd} scp -P ${selectedServer.sshPort} ${WORKSPACE}/${config.artifact} ${selectedServer.user}@${selectedServer.ip}:~/app/app.jar"
+                        echo ">>>>>>>>>>>>>>>>>>>>拷贝成功"
+                    }
+                }
+            }
         }
     }
 }
