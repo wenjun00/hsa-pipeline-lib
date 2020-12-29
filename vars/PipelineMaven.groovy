@@ -34,6 +34,7 @@ def call(Map userConfig) {
     def isRestart = false
     def isPackage = false
     def message = ''
+    def workspacepath= '/Users/wenjun/.jenkins/workspace'
     def severChoice = config.servers.keySet().join("\n")
     pipeline {
         agent any
@@ -108,7 +109,7 @@ def call(Map userConfig) {
                 steps {
                     script {
                         echo ">>>>>>>>>>>>>>>>>>>>开始拷贝jar/war包"
-                        sh "sshpass -p ${selectedServer.passwd} scp -P ${selectedServer.sshPort} ${WORKSPACE}/${config.artifact} ${selectedServer.user}@${selectedServer.ip}:~/app/app.jar"
+                        sh "sshpass -p ${selectedServer.passwd} scp -P ${selectedServer.sshPort} ${workspacepath}/${config.artifact} ${selectedServer.user}@${selectedServer.ip}:~/app/app.jar"
                         echo ">>>>>>>>>>>>>>>>>>>>拷贝成功"
                     }
                 }
