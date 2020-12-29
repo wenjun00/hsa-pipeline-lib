@@ -83,6 +83,22 @@ def call(Map userConfig) {
                     }
                 }
             }
+             stage("编译打包") {
+                when {
+                    expression {
+                        return isDeploy || isPackage
+                    }
+                }
+                steps {
+                    script {
+                        sh "tree -L 2"
+                        echo ">>>>>>>>>>>>>>>>>>>>开始编译打包"
+                        def updateSnapshot = params.forceUpdateSnapshot ? "-U" : ""
+                        sh "${config.mvn} -f ${config.pom} clean package ${updateSnapshot} -Dmaven.test.skip=true -Dmaven.javadoc.skip=true"
+                        echo ">>>>>>>>>>>>>>>>>>>>编译打包成功"
+                    }
+                }
+            }
         }
     }
 }
